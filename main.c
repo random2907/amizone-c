@@ -1,21 +1,28 @@
 #include <stdio.h>
 #include <curl/curl.h>
-#include <stdlib.h>
 #include <string.h>
+
+struct info{
+        int username;
+        char password[100];
+};
+
 
 
 size_t write_chunk(char *data, size_t size, size_t nmemb, char *userdata){
-        for (size_t i=0;i<nmemb;i++){
-                if (data[i]!='\n'){
-                        printf("%c",data[i]);
-                }
+        char *result=strstr(data,"value");
+        int start=result-data+7;
+        while(data[start]!='"')
+        {
+                printf("%c",data[start]);
+                start++;
         }
         return 0;
 }
 
 
 
-int req(){
+int requestver1(){
         CURL *curl;
         CURLcode res;
         curl = curl_easy_init();
@@ -28,8 +35,21 @@ int req(){
         return 0;
 }
 
+size_t header_callback(char *buffer, size_t size,size_t nitems, void *userdata){
+        printf("%s",buffer);
+        return size*nitems;
+}
 
-
+int requestcookie(){
+        CURL *curl = curl_easy_init();
+        if(curl) {
+                curl_easy_setopt(curl, CURLOPT_URL, "https://s.amizone.net/");
+                curl_easy_setopt(curl, CURLOPT_NOBODY, 1L);
+                curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_callback);
+                curl_easy_perform(curl);
+        }
+        return 0;
+}
 
 
 
@@ -42,7 +62,7 @@ int req(){
 
 
 int main(){
-        req();
+        requestcookie();
         int count=1;
         while (count==0){
                 printf("\n1. Exam Result\n2. Exam Schedule\n3. Fee Structure\n4. Calender Schedule\n5. Course\n6. Attendance\n7. Class Schedule\n8. Exit\nEnter your choice: ");
