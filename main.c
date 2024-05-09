@@ -5,7 +5,6 @@
 
 
 size_t write_chunk(char *data, size_t size, size_t nmemb, char *userdata){
-        char *p=strstr(data,"loginform");
         for (size_t i=0;i<nmemb;i++){
                 if (data[i]!='\n'){
                         printf("%c",data[i]);
