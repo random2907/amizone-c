@@ -141,7 +141,7 @@ void cookiev1(struct secret *s1, int username, char *password) {
 
 // real good
 
-int fee(char *cook, char *session, char *asp){
+void fee(char *cook, char *session, char *asp){
         char *requestcookie = malloc((strlen(cook)+strlen(asp)+100) * sizeof(char));
         snprintf(requestcookie,(strlen(cook)+strlen(asp)+100) * sizeof(char), "Cookie: __RequestVerificationToken=%s ASP.NET_SessionId=%s; .ASPXAUTH=%s", cook, session, asp);
         CURL *curl;
