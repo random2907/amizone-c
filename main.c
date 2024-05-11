@@ -10,6 +10,7 @@ struct secret{
         char *loginform;
         char *header;
         char *asp;
+        char *session;
 };
 
 size_t write_header(char *buffer, size_t size, size_t nitems, void *userdata) {
@@ -38,6 +39,44 @@ size_t body_consume(char *buffer, size_t size, size_t nitems, void *userdata) {
         int total=size*nitems;
         return total;
 }
+
+
+
+char *session(char *v1, char *cook){
+        char *requestver1 = malloc((strlen(v1)+100) * sizeof(char));
+        snprintf(requestver1,(strlen(v1)+100) * sizeof(char), "__RequestVerificationToken=%s", v1);
+        char *requestcookie = malloc((strlen(cook)+100) * sizeof(char));
+        snprintf(requestcookie,(strlen(cook)+100) * sizeof(char), "Cookie: __RequestVerificationToken=%s", cook);
+        CURL *curl;
+        CURLcode res;
+        char *headers_data=malloc(1);
+        *headers_data='\0';
+        struct curl_slist *headers = NULL;
+        char *url = "https://s.amizone.net/";
+        curl = curl_easy_init();
+        if(curl) {
+                curl_easy_setopt(curl, CURLOPT_URL, url);
+                curl_easy_setopt(curl, CURLOPT_POST, 1L);
+                curl_easy_setopt(curl, CURLOPT_POSTFIELDS, requestver1);
+                headers = curl_slist_append(headers, "Content-Type: application/x-www-form-urlencoded");
+                headers = curl_slist_append(headers, "Referer: https://s.amizone.net/");
+                headers = curl_slist_append(headers, "Connection: keep-alive");
+                headers = curl_slist_append(headers, requestcookie);
+                curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+                curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, body_consume);
+                curl_easy_setopt(curl, CURLOPT_WRITEDATA, NULL);
+                curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, write_header);
+                curl_easy_setopt(curl, CURLOPT_HEADERDATA, &headers_data);
+                res = curl_easy_perform(curl);
+                curl_easy_cleanup(curl);
+                curl_slist_free_all(headers);
+        }
+        char *line=strtok(headers_data,"=");
+        line=strtok(0,"=");
+        line=strtok(0,"=;");
+        return line;
+}
+
 
 char *asp(char *v1, char *cook, int username, char *password){
         char *requestver1 = malloc((strlen(v1)+100) * sizeof(char));
@@ -98,6 +137,7 @@ void cookiev1(struct secret *s1, int username, char *password) {
         s1->header=strtok(0,"=");
         s1->header=strtok(0,"=;");
         s1->asp=asp(s1->loginform,s1->header,username,password);
+        s1->session=session(s1->loginform,s1->header);
 }
 
 
@@ -115,6 +155,12 @@ int main(){
         printf("Enter User ID: ");
         scanf("%s", test.passwd);
         cookiev1(&test,test.username,test.passwd);
+        printf("%d\n",test.username);
+        printf("%s\n",test.passwd);
+        printf("%s\n",test.loginform);
+        printf("%s\n",test.header);
+        printf("%s\n",test.asp);
+        printf("%s\n",test.session);
         int count=1;
         while (count==0){
                 printf("\n1. Exam Result\n2. Exam Schedule\n3. Fee Structure\n4. Calender Schedule\n5. Course\n6. Attendance\n7. Class Schedule\n8. Exit\nEnter your choice: ");
