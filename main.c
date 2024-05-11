@@ -88,10 +88,9 @@ char *asp(char *v1, char *cook, int username, char *password){
         char *headers_data=malloc(1);
         *headers_data='\0';
         struct curl_slist *headers = NULL;
-        char *url = "https://s.amizone.net/";
         curl = curl_easy_init();
         if(curl) {
-                curl_easy_setopt(curl, CURLOPT_URL, url);
+                curl_easy_setopt(curl, CURLOPT_URL, "https://s.amizone.net/");
                 curl_easy_setopt(curl, CURLOPT_POST, 1L);
                 curl_easy_setopt(curl, CURLOPT_POSTFIELDS, requestver1);
                 headers = curl_slist_append(headers, "Content-Type: application/x-www-form-urlencoded");
@@ -140,7 +139,30 @@ void cookiev1(struct secret *s1, int username, char *password) {
         s1->session=session(s1->loginform,s1->header);
 }
 
+// real good
 
+int fee(char *cook, char *session, char *asp){
+        char *requestcookie = malloc((strlen(cook)+strlen(asp)+100) * sizeof(char));
+        snprintf(requestcookie,(strlen(cook)+strlen(asp)+100) * sizeof(char), "Cookie: __RequestVerificationToken=%s ASP.NET_SessionId=%s; .ASPXAUTH=%s", cook, session, asp);
+        CURL *curl;
+        CURLcode res;
+        struct curl_slist *headers = NULL;
+        curl = curl_easy_init();
+        if(curl) {
+                curl_easy_setopt(curl, CURLOPT_URL, "https://s.amizone.net/FeeStructure/FeeStructure/AllFeeReceipt");
+                curl_easy_setopt(curl, CURLOPT_POST, 1L);
+                curl_easy_setopt(curl, CURLOPT_POSTFIELDS, "ifeetype=1");
+                headers = curl_slist_append(headers, "Content-Type: application/x-www-form-urlencoded; charset=UTF-8");
+                headers = curl_slist_append(headers, "Referer: https://s.amizone.net/Home");
+                headers = curl_slist_append(headers, "X-Requested-With: XMLHttpRequest");
+                headers = curl_slist_append(headers, "Connection: keep-alive");
+                headers = curl_slist_append(headers, requestcookie);
+                curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+                res = curl_easy_perform(curl);
+                curl_easy_cleanup(curl);
+                curl_slist_free_all(headers);
+        }
+}
 
 
 
@@ -155,13 +177,7 @@ int main(){
         printf("Enter User ID: ");
         scanf("%s", test.passwd);
         cookiev1(&test,test.username,test.passwd);
-        printf("%d\n",test.username);
-        printf("%s\n",test.passwd);
-        printf("%s\n",test.loginform);
-        printf("%s\n",test.header);
-        printf("%s\n",test.asp);
-        printf("%s\n",test.session);
-        int count=1;
+        int count=0;
         while (count==0){
                 printf("\n1. Exam Result\n2. Exam Schedule\n3. Fee Structure\n4. Calender Schedule\n5. Course\n6. Attendance\n7. Class Schedule\n8. Exit\nEnter your choice: ");
                 int choice;
@@ -178,7 +194,7 @@ int main(){
                                 printf("2");
                                 break;
                         case 3:
-                                printf("3");
+                                fee(test.header, test.session, test.asp);
                                 break;
                         case 4:
                                 printf("4");
