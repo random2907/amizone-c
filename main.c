@@ -142,7 +142,7 @@ void cookiev1(struct secret *s1, int username, char *password) {
 
 // real good
 
-void fee(char *cook, char *session, char *asp){
+int fee(char *cook, char *session, char *asp){
         char *requestcookie = malloc((strlen(cook)+strlen(asp)+100) * sizeof(char));
         snprintf(requestcookie,(strlen(cook)+strlen(asp)+100) * sizeof(char), "Cookie: __RequestVerificationToken=%s ASP.NET_SessionId=%s; .ASPXAUTH=%s", cook, session, asp);
         CURL *curl;
@@ -163,6 +163,7 @@ void fee(char *cook, char *session, char *asp){
                 curl_easy_cleanup(curl);
                 curl_slist_free_all(headers);
         }
+        return 0;
 }
 
 
@@ -172,6 +173,7 @@ void fee(char *cook, char *session, char *asp){
 
 
 int main(){
+        setvbuf(stdout, NULL, _IOLBF, 0);
         struct secret test;
         fprintf(stderr,"Enter User ID: ");
         scanf("%d", &test.username);
@@ -188,34 +190,36 @@ int main(){
                 }               
                 switch(choice){
                         case 1:
-                                printf("1");
+                                printf("1\n");
                                 break;
                         case 2:
-                                printf("2");
+                                printf("2\n");
                                 break;
                         case 3:
                                 fee(test.header, test.session, test.asp);
+                                printf("\n");
                                 break;
                         case 4:
-                                printf("4");
+                                printf("4\n");
                                 break;
                         case 5:
-                                printf("5");
+                                printf("5\n");
                                 break;
                         case 6:
-                                printf("6");
+                                printf("6\n");
                                 break;
                         case 7:
-                                printf("7");
+                                printf("7\n");
                                 break;
                         case 8:
-                                printf("8");
+                                printf("8\n");
                                 count++;
                                 break;
                         default:
                                 printf("Invalid Choice\n");
                                 break;
                 }
+                usleep(400);
         }
 }
 
