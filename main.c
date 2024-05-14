@@ -2,11 +2,12 @@
 #include <curl/curl.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 
 struct secret{
         int username;
-        char passwd[100];
+        char *passwd;
         char *loginform;
         char *header;
         char *asp;
@@ -172,14 +173,13 @@ void fee(char *cook, char *session, char *asp){
 
 int main(){
         struct secret test;
-        printf("Enter User ID: ");
+        fprintf(stderr,"Enter User ID: ");
         scanf("%d", &test.username);
-        printf("Enter User ID: ");
-        scanf("%s", test.passwd);
+        test.passwd=getpass("Enter password: ");
         cookiev1(&test,test.username,test.passwd);
         int count=0;
         while (count==0){
-                printf("\n1. Exam Result\n2. Exam Schedule\n3. Fee Structure\n4. Calender Schedule\n5. Course\n6. Attendance\n7. Class Schedule\n8. Exit\nEnter your choice: ");
+                fprintf(stderr,"\n1. Exam Result\n2. Exam Schedule\n3. Fee Structure\n4. Calender Schedule\n5. Course\n6. Attendance\n7. Class Schedule\n8. Exit\nEnter your choice: ");
                 int choice;
                 while (scanf("%d", &choice)!= 1) {
                         while (getchar() != '\n');
