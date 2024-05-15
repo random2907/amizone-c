@@ -2,7 +2,6 @@
 #include <curl/curl.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
 
 struct secret{
@@ -168,10 +167,20 @@ int fee(char *cook, char *session, char *asp){
 
 
 
-int class_schedule(char *cook, char *asp){
-        char start[10], end[10];
-        scanf("%s",start);
-        scanf("%s",end);
+int class_schedule(char *cook, char *asp, int current){
+        char start[11], end[11];
+        if (current==0){
+                scanf("%s",start);
+                scanf("%s",end);
+        }else{
+                time_t current_time;
+                struct tm *timeinfo;
+                time(&current_time);
+                timeinfo = localtime(&current_time);
+                strftime(start, sizeof(start), "%Y-%m-%d", timeinfo);
+                strftime(end, sizeof(end), "%Y-%m-%d", timeinfo);
+        }
+
         char *requestcookie = malloc((strlen(cook)+strlen(asp)+100) * sizeof(char));
         snprintf(requestcookie, (strlen(cook)+strlen(asp)+100) * sizeof(char), "Cookie: __RequestVerificationToken=%s; .ASPXAUTH=%s", cook, asp);
         char *url = malloc((strlen(start)+strlen(end)+100) * sizeof(char));
@@ -203,6 +212,7 @@ int main(){
         scanf("%d", &test.username);
         scanf("%s",test.passwd);
         cookiev1(&test,test.username,test.passwd);
-        class_schedule(test.header, test.asp);
-//        fee(test.header, test.session, test.asp);
+        //class_schedule(test.header, test.asp,0);
+        //class_schedule(test.header, test.asp,1);
+        //fee(test.header, test.session, test.asp);
 }
