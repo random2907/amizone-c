@@ -7,7 +7,7 @@
 
 struct secret{
         int username;
-        char *passwd;
+        char passwd[100];
         char *loginform;
         char *header;
         char *asp;
@@ -168,59 +168,41 @@ int fee(char *cook, char *session, char *asp){
 
 
 
+int class_schedule(char *cook, char *asp){
+        char start[10], end[10];
+        scanf("%s",start);
+        scanf("%s",end);
+        char *requestcookie = malloc((strlen(cook)+strlen(asp)+100) * sizeof(char));
+        snprintf(requestcookie, (strlen(cook)+strlen(asp)+100) * sizeof(char), "Cookie: __RequestVerificationToken=%s; .ASPXAUTH=%s", cook, asp);
+        char *url = malloc((strlen(start)+strlen(end)+100) * sizeof(char));
+        snprintf(url, (strlen(cook)+strlen(asp)+100) * sizeof(char), "https://s.amizone.net/Calendar/home/GetDiaryEvents?start=%s&end=%s&_=1707456987909", start, end);
+        CURL *curl;
+        CURLcode res;
+        struct curl_slist *headers = NULL;
+        curl = curl_easy_init();
+        if(curl) {
+                curl_easy_setopt(curl, CURLOPT_URL, url);
+                headers = curl_slist_append(headers, "Referer: https://s.amizone.net/Home");
+                headers = curl_slist_append(headers, "X-Requested-With: XMLHttpRequest");
+                headers = curl_slist_append(headers, "Connection: keep-alive");
+                headers = curl_slist_append(headers, requestcookie);
+                curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+                res = curl_easy_perform(curl);
+                curl_easy_cleanup(curl);
+                curl_slist_free_all(headers);
+        }
+        return 0;
+}
+
 
 
 
 
 int main(){
-        setvbuf(stdout, NULL, _IOLBF, 0);
         struct secret test;
-        fprintf(stderr,"Enter User ID: ");
         scanf("%d", &test.username);
-        test.passwd=getpass("Enter password: ");
+        scanf("%s",test.passwd);
         cookiev1(&test,test.username,test.passwd);
-        int count=0;
-        while (count==0){
-                fprintf(stderr,"\n1. Exam Result\n2. Exam Schedule\n3. Fee Structure\n4. Calender Schedule\n5. Course\n6. Attendance\n7. Class Schedule\n8. Exit\nEnter your choice: ");
-                int choice;
-                while (scanf("%d", &choice)!= 1) {
-                        while (getchar() != '\n');
-                        printf("Invalid Choice\n");
-                        break;
-                }               
-                switch(choice){
-                        case 1:
-                                printf("1\n");
-                                break;
-                        case 2:
-                                printf("2\n");
-                                break;
-                        case 3:
-                                fee(test.header, test.session, test.asp);
-                                printf("\n");
-                                break;
-                        case 4:
-                                printf("4\n");
-                                break;
-                        case 5:
-                                printf("5\n");
-                                break;
-                        case 6:
-                                printf("6\n");
-                                break;
-                        case 7:
-                                printf("7\n");
-                                break;
-                        case 8:
-                                printf("8\n");
-                                count++;
-                                break;
-                        default:
-                                printf("Invalid Choice\n");
-                                break;
-                }
-                usleep(400);
-        }
+        class_schedule(test.header, test.asp);
+//        fee(test.header, test.session, test.asp);
 }
-
-
