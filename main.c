@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 struct secret{
         int username;
         char passwd[100];
@@ -13,7 +12,7 @@ struct secret{
         char *session;
 };
 
-size_t write_header(char *buffer, size_t size, size_t nitems, void *userdata) {
+size_t write_header(char *buffer, size_t size, size_t nitems, char *userdata) {
         int total=size*nitems;
         char **header_data = (char **)userdata;
         *header_data=realloc(*header_data,strlen(*header_data)+total+1);
@@ -204,7 +203,41 @@ int class_schedule(char *cook, char *asp, int current){
 }
 
 
+size_t parse_attend(char *buffer, size_t size, size_t nitems, char **userdata) {
+        int total=size*nitems;
+        *userdata=realloc(*userdata,strlen(*userdata)+total+1);
+        strncat(*userdata,buffer,total);
+        return 1;
+}
 
+int attendence(char *cook, char *asp){
+        char *requestcookie = malloc((strlen(cook)+strlen(asp)+100) * sizeof(char));
+        snprintf(requestcookie, (strlen(cook)+strlen(asp)+100) * sizeof(char), "Cookie: __RequestVerificationToken=%s; .ASPXAUTH=%s", cook, asp);
+        CURL *curl;
+        CURLcode res;
+        char *test=malloc(1);
+        *test='\0';
+        struct curl_slist *headers = NULL;
+        curl = curl_easy_init();
+        if(curl) {
+                curl_easy_setopt(curl, CURLOPT_URL, "https://s.amizone.net/Home/_Home?X-Requested-With=XMLHttpRequest");
+                headers = curl_slist_append(headers, "Referer: https://s.amizone.net/Home");
+                headers = curl_slist_append(headers, "X-Requested-With: XMLHttpRequest");
+                headers = curl_slist_append(headers, "Connection: keep-alive");
+                headers = curl_slist_append(headers, requestcookie);
+                curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+                curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, parse_attend);
+                curl_easy_setopt(curl, CURLOPT_WRITEDATA, &test);
+                res = curl_easy_perform(curl);
+                curl_easy_cleanup(curl);
+                curl_slist_free_all(headers);
+        }
+        char x[100][100];
+        char *result=strstr(test,"sub-code");
+        int start=result-test;
+
+        return 0;
+}
 
 
 int main(){
@@ -212,7 +245,8 @@ int main(){
         scanf("%d", &test.username);
         scanf("%s",test.passwd);
         cookiev1(&test,test.username,test.passwd);
-        //class_schedule(test.header, test.asp,0);
+        attendence(test.header, test.asp);
+        //calender_schedule(test.header, test.asp,0);
         //class_schedule(test.header, test.asp,1);
         //fee(test.header, test.session, test.asp);
 }
