@@ -203,11 +203,36 @@ int class_schedule(char *cook, char *asp, int current){
 }
 
 
-size_t parse_attend(char *buffer, size_t size, size_t nitems, char **userdata) {
+size_t write_attend(char *buffer, size_t size, size_t nitems, char **userdata) {
         int total=size*nitems;
         *userdata=realloc(*userdata,strlen(*userdata)+total+1);
         strncat(*userdata,buffer,total);
         return 1;
+}
+
+int parse_attend(char *buff){
+        // course_code
+        int position_str[50];
+        int count_str=0;
+        char *result=buff;
+        while ((result=strstr(result,"sub-code"))!=NULL){
+                position_str[count_str]=result-buff+strlen("sub-code")+2;
+                result += strlen("sub-code");
+                count_str++;
+        }
+        char course_code[count_str][100];
+        for (int i=0; i<count_str; i++){
+                int y=0;
+                while (((buff+position_str[i])[y])!=' '){
+                        course_code[i][y]=((buff+position_str[i])[y]);
+                        y++;
+                }
+                course_code[i][y]='\0';
+        }
+        for (int j=0; j<count_str; j++){
+                printf("%s\n",course_code[j]);
+        }
+        return 0;
 }
 
 int attendence(char *cook, char *asp){
@@ -226,15 +251,14 @@ int attendence(char *cook, char *asp){
                 headers = curl_slist_append(headers, "Connection: keep-alive");
                 headers = curl_slist_append(headers, requestcookie);
                 curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-                curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, parse_attend);
+                curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_attend);
                 curl_easy_setopt(curl, CURLOPT_WRITEDATA, &test);
                 res = curl_easy_perform(curl);
                 curl_easy_cleanup(curl);
                 curl_slist_free_all(headers);
         }
-        char x[100][100];
-        char *result=strstr(test,"sub-code");
-        int start=result-test;
+
+        parse_attend(test);
 
         return 0;
 }
