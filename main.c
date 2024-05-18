@@ -283,17 +283,23 @@ int parse_attend(char *buff){
 
         // to json
 
-        char attend_json[5000];
-        attend_json[0]='[';
+        size_t max_buffer_size=0;
         for (int i=0; i<count_str; i++){
-                char buffer[200];
-                snprintf(buffer,sizeof(buffer),"{\"code\":\"%s\", \"title\":\"%s\", \"completion_percentage\":\"%s %s\"}", course_code[i],course_code2[i], course_code1[i],course_code3[i]);
-                strncat(attend_json, buffer, sizeof(attend_json)-strlen(attend_json)-1); 
+                max_buffer_size+=(70+strlen(course_code[i])+strlen(course_code1[i])+strlen(course_code2[i])+strlen(course_code3[i]));
+        }
+        char *attend_json=malloc(max_buffer_size*sizeof(char));
+        attend_json[0]='[';
+        attend_json[1]='\0';
+        for (int i=0; i<count_str; i++){
+                size_t buffer_size=(70+strlen(course_code[i])+strlen(course_code1[i])+strlen(course_code2[i])+strlen(course_code3[i]));
+                char *buffer=malloc(buffer_size*sizeof(char));
+                snprintf(buffer,buffer_size,"{\"code\":\"%s\", \"title\":\"%s\", \"completion_percentage\":\"%s %s\"}", course_code[i],course_code2[i], course_code1[i],course_code3[i]);
+                strncat(attend_json, buffer, max_buffer_size-strlen(attend_json)-1); 
                 if (i<count_str-1){
-                        strncat(attend_json, ",", sizeof(attend_json)-strlen(attend_json)-1); 
+                        strncat(attend_json, ",", max_buffer_size-strlen(attend_json)-1); 
                 }
         }
-        strncat(attend_json, "]", sizeof(attend_json) - strlen(attend_json) - 1);
+        strncat(attend_json, "]", max_buffer_size - strlen(attend_json) - 1);
         printf("%s",attend_json);
 
         return 0;
