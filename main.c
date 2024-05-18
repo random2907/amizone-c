@@ -232,6 +232,67 @@ int parse_attend(char *buff){
         for (int j=0; j<count_str; j++){
                 printf("%s\n",course_code[j]);
         }
+
+        // percentage_attend
+
+        int position_str1[50];
+
+        int count_str1=0;
+        char *result1=buff;
+        while ((result1=strstr(result1,"class-count"))!=NULL){
+                position_str1[count_str1]=result1-buff+strlen("class-count")+2;
+                result1 += strlen("class-count");
+                count_str1++;
+        }
+
+        char course_code1[count_str1][100];
+
+        for (int i=0; i<count_str1; i++){
+                int y=0;
+                while (((buff+position_str1[i])[y])!=' '){
+                        course_code1[i][y]=((buff+position_str1[i])[y]);
+                        y++;
+                }
+                course_code1[i][y]='\0';
+        }
+        for (int j=0; j<count_str1; j++){
+                printf("%s\n",course_code1[j]);
+        }
+
+        // course_name
+
+
+        char course_code2[count_str][100];
+
+        for (int i=0; i<count_str; i++){
+                int y=0;
+                while (((buff+position_str[i]+strlen(course_code[i])+strlen(" </span>"))[y])!='<'){
+                        course_code2[i][y]=((buff+position_str[i]+strlen(course_code[i])+strlen(" </span>"))[y]);
+                        y++;
+                }
+                course_code2[i][y]='\0';
+        }
+        for (int j=0; j<count_str; j++){
+                printf("%s\n",course_code2[j]);
+        }
+
+        // number_attend
+
+
+        char course_code3[count_str][100];
+
+        for (int i=0; i<count_str; i++){
+                int y=0;
+                while (((buff+position_str1[i]+strlen(course_code1[i])+strlen(" <span>"))[y])!='<'){
+                        course_code3[i][y]=((buff+position_str1[i]+strlen(course_code1[i])+strlen(" <span>"))[y]);
+                        y++;
+                }
+                course_code3[i][y]='\0';
+        }
+        for (int j=0; j<count_str; j++){
+                printf("%s\n",course_code3[j]);
+        }
+
         return 0;
 }
 
