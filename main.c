@@ -229,9 +229,6 @@ int parse_attend(char *buff){
                 }
                 course_code[i][y]='\0';
         }
-        for (int j=0; j<count_str; j++){
-                printf("%s\n",course_code[j]);
-        }
 
         // percentage_attend
 
@@ -255,9 +252,6 @@ int parse_attend(char *buff){
                 }
                 course_code1[i][y]='\0';
         }
-        for (int j=0; j<count_str1; j++){
-                printf("%s\n",course_code1[j]);
-        }
 
         // course_name
 
@@ -266,14 +260,11 @@ int parse_attend(char *buff){
 
         for (int i=0; i<count_str; i++){
                 int y=0;
-                while (((buff+position_str[i]+strlen(course_code[i])+strlen(" </span>"))[y])!='<'){
-                        course_code2[i][y]=((buff+position_str[i]+strlen(course_code[i])+strlen(" </span>"))[y]);
+                while (((buff+position_str[i]+strlen(course_code[i])+strlen(" </span>       "))[y])!='<'){
+                        course_code2[i][y]=((buff+position_str[i]+strlen(course_code[i])+strlen(" </span>       "))[y]);
                         y++;
                 }
                 course_code2[i][y]='\0';
-        }
-        for (int j=0; j<count_str; j++){
-                printf("%s\n",course_code2[j]);
         }
 
         // number_attend
@@ -289,9 +280,21 @@ int parse_attend(char *buff){
                 }
                 course_code3[i][y]='\0';
         }
-        for (int j=0; j<count_str; j++){
-                printf("%s\n",course_code3[j]);
+
+        // to json
+
+        char attend_json[5000];
+        attend_json[0]='[';
+        for (int i=0; i<count_str; i++){
+                char buffer[200];
+                snprintf(buffer,sizeof(buffer),"{\"code\":\"%s\", \"title\":\"%s\", \"completion_percentage\":\"%s %s\"}", course_code[i],course_code2[i], course_code1[i],course_code3[i]);
+                strncat(attend_json, buffer, sizeof(attend_json)-strlen(attend_json)-1); 
+                if (i<count_str-1){
+                        strncat(attend_json, ",", sizeof(attend_json)-strlen(attend_json)-1); 
+                }
         }
+        strncat(attend_json, "]", sizeof(attend_json) - strlen(attend_json) - 1);
+        printf("%s",attend_json);
 
         return 0;
 }
