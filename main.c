@@ -73,6 +73,8 @@ char *session(char *v1, char *cook){
         char *line=strtok(headers_data,"=");
         line=strtok(0,"=");
         line=strtok(0,"=;");
+        free(requestver1);
+        free(requestcookie);
         return line;
 }
 
@@ -112,10 +114,12 @@ char *asp(char *v1, char *cook, int username, char *password){
         line=strtok(0,"=");
         line=strtok(0,"=");
         line=strtok(0,"=;");
+        free(requestver1);
+        free(requestcookie);
         return line;
 }
 
-void cookiev1(struct secret *s1, int username, char *password) {
+int cookiev1(struct secret *s1, int username, char *password) {
         CURL *curl;
         CURLcode res;
         s1->loginform=malloc(1);
@@ -136,6 +140,9 @@ void cookiev1(struct secret *s1, int username, char *password) {
         s1->header=strtok(0,"=;");
         s1->asp=asp(s1->loginform,s1->header,username,password);
         s1->session=session(s1->loginform,s1->header);
+        free(tmp_header);
+
+        return 0;
 }
 
 // real good
@@ -161,6 +168,7 @@ int fee(char *cook, char *session, char *asp){
                 curl_easy_cleanup(curl);
                 curl_slist_free_all(headers);
         }
+        free(requestcookie);
         return 0;
 }
 
@@ -199,6 +207,8 @@ int class_schedule(char *cook, char *asp, int current){
                 curl_easy_cleanup(curl);
                 curl_slist_free_all(headers);
         }
+        free(requestcookie);
+        free(url);
         return 0;
 }
 
@@ -298,10 +308,13 @@ int parse_attend(char *buff){
                 if (i<count_str-1){
                         strncat(attend_json, ",", max_buffer_size-strlen(attend_json)-1); 
                 }
+                free(buffer);
         }
         strncat(attend_json, "]", max_buffer_size - strlen(attend_json) - 1);
-        printf("%s",attend_json);
-
+        printf("%s\n",attend_json);
+        
+        free(attend_json);
+        free(buff);
         return 0;
 }
 
@@ -327,9 +340,8 @@ int attendence(char *cook, char *asp){
                 curl_easy_cleanup(curl);
                 curl_slist_free_all(headers);
         }
-
         parse_attend(test);
-
+        free(requestcookie);
         return 0;
 }
 
