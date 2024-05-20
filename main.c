@@ -345,14 +345,86 @@ int attendence(char *cook, char *asp){
         return 0;
 }
 
+int parse_examschedule(char *buff){
+        int count=0;
+        int locate[50];
+        char *result=buff;
+        char searchbuff[][50]={"<td data-title=\"Course Code\">","<td data-title=\"Course Title\">","<td data-title=\"Exam Date\">","<td data-title=\"Time\">","<td data-title=\"Paper Type\">"};
+
+        while((strstr(result,searchbuff[4]))!=NULL){
+
+                result=strstr(result,searchbuff[0]);
+                locate[count]=result-buff+strlen(searchbuff[0]);
+                result+=strlen(searchbuff[0]);
+                count++;
+
+                result=strstr(result,searchbuff[1]);
+                locate[count]=result-buff+strlen(searchbuff[1]);
+                result+=strlen(searchbuff[1]);
+                count++;
+
+                result=strstr(result,searchbuff[2]);
+                locate[count]=result-buff+strlen(searchbuff[2]);
+                result+=strlen(searchbuff[2]);
+                count++;
+
+                result=strstr(result,searchbuff[3]);
+                locate[count]=result-buff+strlen(searchbuff[3]);
+                result+=strlen(searchbuff[3]);
+                count++;
+
+                result=strstr(result,searchbuff[4]);
+                locate[count]=result-buff+strlen(searchbuff[4]);
+                result+=strlen(searchbuff[4]);
+                count++;
+
+        }
+
+        for (int i=0; i<20; i++){
+                printf("%d\n",locate[i]);
+        }
+
+        return 0;
+
+}
+
+int exam_schedule(char *cook, char *asp, char *session){
+        char *requestcookie = malloc((strlen(cook)+strlen(asp)+100) * sizeof(char));
+        snprintf(requestcookie, (strlen(cook)+strlen(asp)+100) * sizeof(char), "Cookie: __RequestVerificationToken=%s; .ASPXAUTH=%s; asp.net_sessionid=%s", cook, asp, session);
+        CURL *curl;
+        CURLcode res;
+        char *test=malloc(1);
+        *test='\0';
+        struct curl_slist *headers = NULL;
+        curl = curl_easy_init();
+        if(curl) {
+                curl_easy_setopt(curl, CURLOPT_URL, "https://s.amizone.net/Examination/ExamSchedule?X-Requested-With=XMLHttpRequest");
+                headers = curl_slist_append(headers, "Referer: https://s.amizone.net/Home");
+                headers = curl_slist_append(headers, "X-Requested-With: XMLHttpRequest");
+                headers = curl_slist_append(headers, "Connection: keep-alive");
+                headers = curl_slist_append(headers, requestcookie);
+                curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+                curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_attend);
+                curl_easy_setopt(curl, CURLOPT_WRITEDATA, &test);
+                res = curl_easy_perform(curl);
+                curl_easy_cleanup(curl);
+                curl_slist_free_all(headers);
+        }
+        parse_examschedule(test);
+        free(requestcookie);
+        return 0;
+}
+
+
 
 int main(){
         struct secret test;
         scanf("%d", &test.username);
         scanf("%s",test.passwd);
         cookiev1(&test,test.username,test.passwd);
-        attendence(test.header, test.asp);
-        //calender_schedule(test.header, test.asp,0);
-        //class_schedule(test.header, test.asp,1);
-        //fee(test.header, test.session, test.asp);
+        exam_schedule(test.header, test.asp, test.session);
+        /*attendence(test.header, test.asp);*/
+        /*calender_schedule(test.header, test.asp,0);*/
+        /*class_schedule(test.header, test.asp,1);*/
+        /*fee(test.header, test.session, test.asp);*/
 }
