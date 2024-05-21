@@ -312,7 +312,7 @@ int parse_attend(char *buff){
         }
         strncat(attend_json, "]", max_buffer_size - strlen(attend_json) - 1);
         printf("%s\n",attend_json);
-        
+
         free(attend_json);
         free(buff);
         return 0;
@@ -374,16 +374,47 @@ int parse_examschedule(char *buff){
                 count++;
 
                 result=strstr(result,searchbuff[4]);
-                locate[count]=result-buff+strlen(searchbuff[4]);
+                locate[count]=result-buff+strlen(searchbuff[4])+strlen("<b>Exam Mode : ");;
                 result+=strlen(searchbuff[4]);
                 count++;
 
         }
 
-        for (int i=0; i<20; i++){
-                printf("%d\n",locate[i]);
+        char extracted_data[count][100];
+        for (int i=0; i<(count); i++){
+                int y=0;
+                while (((buff+locate[i]))[y]!='<'){
+                        extracted_data[i][y]=((buff+locate[i])[y]);
+                        y++;
+                }
+                extracted_data[i][y]='\0';
         }
+        
+        // to json
 
+        size_t max_buffer_size=0;  // default for json key
+        for (int i=0; i<count; i++){
+                max_buffer_size+=(70+strlen(extracted_data[i]));
+        }
+        char *attend_json=malloc(max_buffer_size*sizeof(char));
+        attend_json[0]='[';
+        attend_json[1]='\0';
+        for (int i=0; i<count; i+=5){
+                size_t buffer_size=(80+strlen(extracted_data[i])+strlen(extracted_data[i+1])+strlen(extracted_data[i+2])+strlen(extracted_data[i+3])+strlen(extracted_data[i+4]));
+                char *buffer=malloc(buffer_size*sizeof(char));
+                snprintf(buffer,buffer_size,"{\"Course_Code\":\"%s\", \"Course_Title\":\"%s\", \"Date\":\"%s\", \"Time\":\"%s\", \"Exam_Type\":\"%s\"}",extracted_data[i],extracted_data[i+1],extracted_data[i+2],extracted_data[i+3],extracted_data[i+4]);
+                strncat(attend_json, buffer, max_buffer_size-strlen(attend_json)-1); 
+
+                if (i+5<count){
+                        strncat(attend_json, ",", max_buffer_size-strlen(attend_json)-1); 
+                }
+                free(buffer);
+        }
+        strncat(attend_json, "]", max_buffer_size - strlen(attend_json) - 1);
+        printf("%s\n",attend_json);
+
+        free(attend_json);
+        free(buff);
         return 0;
 
 }
@@ -422,7 +453,7 @@ int main(){
         scanf("%d", &test.username);
         scanf("%s",test.passwd);
         cookiev1(&test,test.username,test.passwd);
-        exam_schedule(test.header, test.asp, test.session);
+        /*exam_schedule(test.header, test.asp, test.session);*/
         /*attendence(test.header, test.asp);*/
         /*calender_schedule(test.header, test.asp,0);*/
         /*class_schedule(test.header, test.asp,1);*/
