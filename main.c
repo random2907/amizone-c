@@ -396,24 +396,24 @@ int parse_examschedule(char *buff){
         for (int i=0; i<count; i++){
                 max_buffer_size+=(70+strlen(extracted_data[i]));
         }
-        char *attend_json=malloc(max_buffer_size*sizeof(char));
-        attend_json[0]='[';
-        attend_json[1]='\0';
+        char *examsched_json=malloc(max_buffer_size*sizeof(char));
+        examsched_json[0]='[';
+        examsched_json[1]='\0';
         for (int i=0; i<count; i+=5){
                 size_t buffer_size=(80+strlen(extracted_data[i])+strlen(extracted_data[i+1])+strlen(extracted_data[i+2])+strlen(extracted_data[i+3])+strlen(extracted_data[i+4]));
                 char *buffer=malloc(buffer_size*sizeof(char));
                 snprintf(buffer,buffer_size,"{\"Course_Code\":\"%s\", \"Course_Title\":\"%s\", \"Date\":\"%s\", \"Time\":\"%s\", \"Exam_Type\":\"%s\"}",extracted_data[i],extracted_data[i+1],extracted_data[i+2],extracted_data[i+3],extracted_data[i+4]);
-                strncat(attend_json, buffer, max_buffer_size-strlen(attend_json)-1); 
+                strncat(examsched_json, buffer, max_buffer_size-strlen(examsched_json)-1); 
 
                 if (i+5<count){
-                        strncat(attend_json, ",", max_buffer_size-strlen(attend_json)-1); 
+                        strncat(examsched_json, ",", max_buffer_size-strlen(examsched_json)-1); 
                 }
                 free(buffer);
         }
-        strncat(attend_json, "]", max_buffer_size - strlen(attend_json) - 1);
-        printf("%s\n",attend_json);
+        strncat(examsched_json, "]", max_buffer_size - strlen(examsched_json) - 1);
+        printf("%s\n",examsched_json);
 
-        free(attend_json);
+        free(examsched_json);
         free(buff);
         return 0;
 
@@ -446,6 +446,43 @@ int exam_schedule(char *cook, char *asp, char *session){
         return 0;
 }
 
+int parse_result(char *buff){
+
+
+        return 0;
+}
+
+
+int exam_result(char *cook, char *asp, char *session, int sem){
+        char *requestcookie = malloc((strlen(cook)+strlen(asp)+100) * sizeof(char));
+        snprintf(requestcookie, (strlen(cook)+strlen(asp)+100) * sizeof(char), "Cookie: __RequestVerificationToken=%s; ASP.NET_SessionId=%s; .ASPXAUTH=%s", cook, session, asp);
+        char semester[]="sem";
+        snprintf(semester, strlen(semester), "sem=%d", sem);
+        CURL *curl;
+        CURLcode res;
+        char *test=malloc(1);
+        *test='\0';
+        struct curl_slist *headers = NULL;
+        curl = curl_easy_init();
+        if(curl) {
+                curl_easy_setopt(curl, CURLOPT_URL, "https://s.amizone.net/Examination/Examination?X-Requested-With=XMLHttpRequest");
+                curl_easy_setopt(curl, CURLOPT_POST, 1L);
+                curl_easy_setopt(curl, CURLOPT_POSTFIELDS, semester);
+                headers = curl_slist_append(headers, "Referer: https://s.amizone.net/Home");
+                headers = curl_slist_append(headers, "X-Requested-With: XMLHttpRequest");
+                headers = curl_slist_append(headers, "Connection: keep-alive");
+                headers = curl_slist_append(headers, requestcookie);
+                curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+                curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_attend);
+                curl_easy_setopt(curl, CURLOPT_WRITEDATA, &test);
+                res = curl_easy_perform(curl);
+                curl_easy_cleanup(curl);
+                curl_slist_free_all(headers);
+        }
+        parse_result(test); 
+        return 0;
+}
+
 
 
 int main(){
@@ -453,6 +490,7 @@ int main(){
         scanf("%d", &test.username);
         scanf("%s",test.passwd);
         cookiev1(&test,test.username,test.passwd);
+        exam_result(test.header, test.asp, test.session, 1);
         /*exam_schedule(test.header, test.asp, test.session);*/
         /*attendence(test.header, test.asp);*/
         /*calender_schedule(test.header, test.asp,0);*/
