@@ -447,7 +447,122 @@ int exam_schedule(char *cook, char *asp, char *session){
 }
 
 int parse_result(char *buff){
+        int count=0;
+        int locate[150];
+        char *result=buff;
+        char searchbuff[][50]={"<td data-title=\"Sno\">","<td data-title=\"Course Code\">","<td data-title=\"Course Title\">","<td data-title=\"Max Total\">","<td data-title=\"ACU\">","<td data-title=\"Go\">","<td data-title=\"GP\">","<td data-title=\"CP\">","<td data-title=\"ECU\">","<td data-title=\"PublishDate\">","<td data-title=\"Semester\">","<td data-title=\"SGPA\">","<td data-title=\"CGPA\">","<td data-title=\"Back Papers\">"};
 
+        while((strstr(result,searchbuff[9]))!=NULL){
+
+                result=strstr(result,searchbuff[0]);
+                locate[count]=result-buff+strlen(searchbuff[0]);
+                result+=strlen(searchbuff[0]);
+                count++;
+                
+                result=strstr(result,searchbuff[1]);
+                locate[count]=result-buff+strlen(searchbuff[1]);
+                result+=strlen(searchbuff[1]);
+                count++;
+
+                result=strstr(result,searchbuff[2]);
+                locate[count]=result-buff+strlen(searchbuff[2]);
+                result+=strlen(searchbuff[2]);
+                count++;
+
+                result=strstr(result,searchbuff[3]);
+                locate[count]=result-buff+strlen(searchbuff[3]);
+                result+=strlen(searchbuff[3]);
+                count++;
+
+                result=strstr(result,searchbuff[4]);
+                locate[count]=result-buff+strlen(searchbuff[4]);
+                result+=strlen(searchbuff[4]);
+                count++;
+
+                result=strstr(result,searchbuff[5]);
+                locate[count]=result-buff+strlen(searchbuff[5]);
+                result+=strlen(searchbuff[5]);
+                count++;
+
+                result=strstr(result,searchbuff[6]);
+                locate[count]=result-buff+strlen(searchbuff[6]);
+                result+=strlen(searchbuff[6]);
+                count++;
+
+                result=strstr(result,searchbuff[7]);
+                locate[count]=result-buff+strlen(searchbuff[7]);
+                result+=strlen(searchbuff[7]);
+                count++;
+
+                result=strstr(result,searchbuff[8]);
+                locate[count]=result-buff+strlen(searchbuff[8]);
+                result+=strlen(searchbuff[8]);
+                count++;
+
+                result=strstr(result,searchbuff[9]);
+                locate[count]=result-buff+strlen(searchbuff[9]);
+                result+=strlen(searchbuff[9]);
+                count++;
+
+        }
+        
+        // left semester, scgpa, cgpa, back papers
+
+        int locate_ex[4];
+        result=strstr(result,searchbuff[10]);
+        result=strstr(result," ");
+        locate_ex[0]=result-buff+strlen(searchbuff[10]);
+        result+=strlen(searchbuff[10]);
+
+        result=strstr(result,searchbuff[11]);
+        result=strstr(result," ");
+        locate_ex[1]=result-buff+strlen(searchbuff[11]);
+        result+=strlen(searchbuff[11]);
+
+        result=strstr(result,searchbuff[12]);
+        result=strstr(result," ");
+        locate_ex[2]=result-buff+strlen(searchbuff[12]);
+        result+=strlen(searchbuff[12]);
+
+        result=strstr(result,searchbuff[13]);
+        result=strstr(result," ");
+        locate_ex[3]=result-buff+strlen(searchbuff[13]);
+        result+=strlen(searchbuff[13]);
+
+        //done
+
+
+        char extracted_data[count][100];
+        for (int i=0; i<count; i++){
+                int y=0;
+                while (((buff+locate[i]))[y]!='<'){
+                        extracted_data[i][y]=((buff+locate[i])[y]);
+                        y++;
+                }
+                extracted_data[i][y]='\0';
+        }
+
+        char extracted_data_ex[4][100];
+        for (int i=0; i<4; i++){
+                int y=0;
+                int k=0;
+                while (((buff+locate_ex[i]))[k]==' '){
+                        k++;
+                }
+                while (((buff+locate_ex[i]+k))[y]!='&'){
+                        extracted_data_ex[i][y]=((buff+locate_ex[i]+k)[y]);
+                        y++;
+                }
+                extracted_data_ex[i][y]='\0';
+        }
+
+        for (int i=0; i<4; i++){
+                printf("%s\n",extracted_data_ex[i]);
+        }
+
+        for (int i=0; i<count; i++){
+                printf("%s\n",extracted_data[i]);
+        }
 
         return 0;
 }
