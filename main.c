@@ -70,14 +70,24 @@ char *session(char *v1, char *cook){
                 curl_easy_cleanup(curl);
                 curl_slist_free_all(headers);
         }
-        char *line=strtok(headers_data,"=");
-        line=strtok(0,"=");
-        line=strtok(0,"=;");
-        free(requestver1);
-        free(requestcookie);
-        return line;
-}
 
+        char *result=strstr(headers_data,"set-cookie: ASP.NET_SessionId=");
+        int position=result-headers_data+strlen("set-cookie: ASP.NET_SessionId=");
+
+        int y=0;
+        while (((headers_data+position)[y])!=';'){
+                y++;
+        }
+
+        char *tmp_session=malloc((y+1)*sizeof(char));
+        *tmp_session='\0';
+        strncat(tmp_session,headers_data+position,y);
+        free(requestcookie);
+        free(requestver1);
+        free(headers_data);
+
+        return tmp_session;
+}
 
 char *asp(char *v1, char *cook, int username, char *password){
         char *requestver1 = malloc((strlen(v1)+100) * sizeof(char));
@@ -107,16 +117,23 @@ char *asp(char *v1, char *cook, int username, char *password){
                 curl_easy_cleanup(curl);
                 curl_slist_free_all(headers);
         }
-        char *line=strtok(headers_data,"=");
-        line=strtok(0,"=");
-        line=strtok(0,"=");
-        line=strtok(0,"=");
-        line=strtok(0,"=");
-        line=strtok(0,"=");
-        line=strtok(0,"=;");
-        free(requestver1);
+        char *result=strstr(headers_data,"set-cookie: .ASPXAUTH=");
+        result+=strlen("set-cookie: .ASPXAUTH=");
+        result=strstr(result,"set-cookie: .ASPXAUTH=");
+        int position=result-headers_data+strlen("set-cookie: .ASPXAUTH=");
+
+        int y=0;
+        while (((headers_data+position)[y])!=';'){
+                y++;
+        }
+
+        char *tmp_asp=malloc((y+1)*sizeof(char));
+        *tmp_asp='\0';
+        strncat(tmp_asp,headers_data+position,y);
         free(requestcookie);
-        return line;
+        free(requestver1);
+        free(headers_data);
+        return tmp_asp;
 }
 
 int cookiev1(struct secret *s1, int username, char *password) {
@@ -135,15 +152,27 @@ int cookiev1(struct secret *s1, int username, char *password) {
                 curl_easy_setopt(curl, CURLOPT_WRITEDATA, &s1->loginform);
                 res = curl_easy_perform(curl);
         }
-        s1->header=strtok(tmp_header,"=");
-        s1->header=strtok(0,"=");
-        s1->header=strtok(0,"=;");
+        //parse tmp_header to get requestcookie
+        char *result=strstr(tmp_header,"set-cookie: __RequestVerificationToken=");
+        int position=result-tmp_header+strlen("set-cookie: __RequestVerificationToken=");
+
+        int y=0;
+        while (((tmp_header+position)[y])!=';'){
+                y++;
+        }
+        s1->header=malloc((y+1)*sizeof(char));
+        *s1->header='\0';
+        strncat(s1->header,tmp_header+position,y);
+
         s1->asp=asp(s1->loginform,s1->header,username,password);
         s1->session=session(s1->loginform,s1->header);
         free(tmp_header);
-
+        //
         return 0;
 }
+
+
+
 
 // real good
 
@@ -389,7 +418,7 @@ int parse_examschedule(char *buff){
                 }
                 extracted_data[i][y]='\0';
         }
-        
+
         // to json
 
         size_t max_buffer_size=0;  // default for json key
@@ -458,7 +487,7 @@ int parse_result(char *buff){
                 locate[count]=result-buff+strlen(searchbuff[0]);
                 result+=strlen(searchbuff[0]);
                 count++;
-                
+
                 result=strstr(result,searchbuff[1]);
                 locate[count]=result-buff+strlen(searchbuff[1]);
                 result+=strlen(searchbuff[1]);
@@ -505,7 +534,7 @@ int parse_result(char *buff){
                 count++;
 
         }
-        
+
         // left semester, scgpa, cgpa, back papers
 
         int locate_ex[4];
