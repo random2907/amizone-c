@@ -585,13 +585,39 @@ int parse_result(char *buff){
                 extracted_data_ex[i][y]='\0';
         }
 
-        for (int i=0; i<4; i++){
-                printf("%s\n",extracted_data_ex[i]);
-        }
+        size_t max_buffer_size=0;  // default for json key
+        max_buffer_size+=(70+strlen(extracted_data_ex[0])+strlen(extracted_data_ex[1])+strlen(extracted_data_ex[2])+strlen(extracted_data_ex[3]));
 
         for (int i=0; i<count; i++){
-                printf("%s\n",extracted_data[i]);
+                max_buffer_size+=(70+strlen(extracted_data[i]));
         }
+        char *examresult_json=malloc(max_buffer_size*sizeof(char));
+        examresult_json[0]='[';
+        examresult_json[1]='\0';
+        size_t buffer_size_ex=(70+strlen(extracted_data_ex[0])+strlen(extracted_data_ex[1])+strlen(extracted_data_ex[2])+strlen(extracted_data_ex[3]));
+        char *buffer_ex=malloc(buffer_size_ex*sizeof(char));
+        snprintf(buffer_ex,buffer_size_ex,"{\"Semester\":\"%s\", \"SGPA\":\"%s\", \"CGPA\":\"%s\", \"Back Papers\":\"%s\"}",extracted_data_ex[0],extracted_data_ex[1],extracted_data_ex[2],extracted_data_ex[3]);
+        strncat(examresult_json, buffer_ex, max_buffer_size-strlen(examresult_json)-1);
+        strncat(examresult_json, ",", max_buffer_size-strlen(examresult_json)-1); 
+
+        for (int i=0; i<count; i+=10){
+                size_t buffer_size=(140+strlen(extracted_data[i])+strlen(extracted_data[i+1])+strlen(extracted_data[i+2])+strlen(extracted_data[i+3])+strlen(extracted_data[i+4])+strlen(extracted_data[i+5])+strlen(extracted_data[i+6])+strlen(extracted_data[i+7])+strlen(extracted_data[i+8])+strlen(extracted_data[i+9]));
+                char *buffer=malloc(buffer_size*sizeof(char));
+                snprintf(buffer,buffer_size,"{\"Sno\":\"%s\", \"Course_Code\":\"%s\", \"Course_Title\":\"%s\", \"Max_Total\":\"%s\", \"ACU\":\"%s\", \"Go\":\"%s\", \"GP\":\"%s\", \"CP\":\"%s\", \"ECU\":\"%s\", \"PublishDate\":\"%s\"}",extracted_data[i],extracted_data[i+1],extracted_data[i+2],extracted_data[i+3],extracted_data[i+4],extracted_data[i+5],extracted_data[i+6],extracted_data[i+7],extracted_data[i+8],extracted_data[i+9]);
+                strncat(examresult_json, buffer, max_buffer_size-strlen(examresult_json)-1); 
+
+                if (i+10<count){
+                        strncat(examresult_json, ",", max_buffer_size-strlen(examresult_json)-1); 
+                }
+                free(buffer);
+        }
+        strncat(examresult_json, "]", max_buffer_size - strlen(examresult_json) - 1);
+        printf("%s\n",examresult_json);
+        free(examresult_json);
+        free(buffer_ex);
+        free(buff);
+
+
 
         return 0;
 }
