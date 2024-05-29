@@ -626,8 +626,8 @@ int parse_result(char *buff){
 int exam_result(char *cook, char *asp, char *session, int sem){
         char *requestcookie = malloc((strlen(cook)+strlen(asp)+strlen(session)+100) * sizeof(char));
         snprintf(requestcookie, (strlen(cook)+strlen(asp)+strlen(session)+100) * sizeof(char), "Cookie: __RequestVerificationToken=%s; ASP.NET_SessionId=%s; .ASPXAUTH=%s", cook, session, asp);
-        char *semester=malloc((strlen("sem=x")+1)*sizeof(char));
-        snprintf(semester, strlen(semester), "sem=%d", sem);
+        char semester[20];
+        snprintf(semester, sizeof(semester), "sem=%d", sem);
         CURL *curl;
         CURLcode res;
         char *test=malloc(1);
@@ -727,8 +727,9 @@ int parse_course(char *buff){
 int course_list(char *cook, char *asp, char *session, int sem){
         char *requestcookie = malloc((strlen(cook)+strlen(asp)+strlen(session)+100) * sizeof(char));
         snprintf(requestcookie, (strlen(cook)+strlen(asp)+strlen(session)+100) * sizeof(char), "Cookie: __RequestVerificationToken=%s; ASP.NET_SessionId=%s; .ASPXAUTH=%s", cook, session, asp);
-        char *semester=malloc((strlen("sem=x")+1)*sizeof(char));
-        snprintf(semester, strlen(semester), "sem=%d", sem);
+        char semester[20];
+        snprintf(semester, sizeof(semester), "sem=%d", sem);
+        printf("%s\n",semester);
         CURL *curl;
         CURLcode res;
         char *test=malloc(1);
