@@ -654,69 +654,139 @@ int exam_result(char *cook, char *asp, char *session, int sem){
 }
 
 int parse_course(char *buff){
-        int count=0;
-        int locate[150];
+        int count_comp=0;
+        int count_domain=0;
+        int locate_comp[150];
+        int locate_domain[150];
         char *result=buff;
         char searchbuff[][50]={"<td data-title=\"Course Code\">","<td data-title=\"Course Name\">","<td data-title=\"Type\">","<td data-title=\"Course Syllabus\">","<td data-title=\"Attendance\">","<td data-title=\"Internal Asses.\">"};
+        int comp=strstr(buff,"</tbody")-buff;
 
         while((strstr(result,searchbuff[5]))!=NULL){
+                if (comp>=(strstr(result,searchbuff[0])-buff)){
+                        result=strstr(result,searchbuff[0]);
+                        locate_comp[count_comp]=result-buff+strlen(searchbuff[0]);
+                        result+=strlen(searchbuff[0]);
+                        count_comp++;
 
-                result=strstr(result,searchbuff[0]);
-                locate[count]=result-buff+strlen(searchbuff[0]);
-                result+=strlen(searchbuff[0]);
-                count++;
+                        result=strstr(result,searchbuff[1]);
+                        locate_comp[count_comp]=result-buff+strlen(searchbuff[1]);
+                        result+=strlen(searchbuff[1]);
+                        count_comp++;
 
-                result=strstr(result,searchbuff[1]);
-                locate[count]=result-buff+strlen(searchbuff[1]);
-                result+=strlen(searchbuff[1]);
-                count++;
+                        result=strstr(result,searchbuff[2]);
+                        locate_comp[count_comp]=result-buff+strlen(searchbuff[2]);
+                        result+=strlen(searchbuff[2]);
+                        count_comp++;
 
-                result=strstr(result,searchbuff[2]);
-                locate[count]=result-buff+strlen(searchbuff[2]);
-                result+=strlen(searchbuff[2]);
-                count++;
+                        result=strstr(result,searchbuff[3]);
+                        result=strstr(result,"href=");
+                        locate_comp[count_comp]=result-buff+strlen("href=");
+                        result+=strlen(searchbuff[3]);
+                        count_comp++;
 
-                result=strstr(result,searchbuff[3]);
-                result=strstr(result,"href=");
-                locate[count]=result-buff+strlen("href=");
-                result+=strlen(searchbuff[3]);
-                count++;
+                        result=strstr(result,searchbuff[4]);
+                        result=strstr(result,"class");
+                        result=strstr(result+strlen("class"),"class");
+                        result=strstr(result+strlen("class"),">");
+                        locate_comp[count_comp]=result-buff+strlen(">");
+                        result+=strlen(searchbuff[4]);
+                        count_comp++;
 
-                result=strstr(result,searchbuff[4]);
-                result=strstr(result,"class");
-                result=strstr(result+strlen("class"),"class");
-                result=strstr(result+strlen("class"),">");
-                locate[count]=result-buff+strlen(">");
-                result+=strlen(searchbuff[4]);
-                count++;
+                        result=strstr(result,searchbuff[5]);
+                        locate_comp[count_comp]=result-buff+strlen(searchbuff[5]);
+                        result+=strlen(searchbuff[5]);
+                        count_comp++;
+                }else{
+                        result=strstr(result,searchbuff[0]);
+                        result=strstr(result," ");
+                        locate_domain[count_domain]=result-buff+strlen(searchbuff[0]);
+                        result+=strlen(searchbuff[0]);
+                        count_domain++;
 
-                result=strstr(result,searchbuff[5]);
-                locate[count]=result-buff+strlen(searchbuff[5]);
-                result+=strlen(searchbuff[5]);
-                count++;
+                        result=strstr(result,searchbuff[1]);
+                        result=strstr(result," ");
+                        locate_domain[count_domain]=result-buff+strlen(searchbuff[1]);
+                        result+=strlen(searchbuff[1]);
+                        count_domain++;
+
+                        result=strstr(result,searchbuff[2]);
+                        result=strstr(result," ");
+                        locate_domain[count_domain]=result-buff+strlen(searchbuff[2]);
+                        result+=strlen(searchbuff[2]);
+                        count_domain++;
+
+                        result=strstr(result,searchbuff[3]);
+                        result=strstr(result,"href=");
+                        locate_domain[count_domain]=result-buff+strlen("href=");
+                        result+=strlen(searchbuff[3]);
+                        count_domain++;
+
+                        result=strstr(result,searchbuff[4]);
+                        result=strstr(result," ");
+                        locate_domain[count_domain]=result-buff+strlen(searchbuff[4]);
+                        result+=strlen(searchbuff[4]);
+                        count_domain++;
+
+                        result=strstr(result,searchbuff[5]);
+                        result=strstr(result," ");
+                        locate_domain[count_domain]=result-buff+strlen(searchbuff[5]);
+                        result+=strlen(searchbuff[5]);
+                        count_domain++;
+                }
         }
 
-        char extracted_data[count][200];
+        // for compulsory course
+        char extracted_data_comp[count_comp][200];
         int link=3;
-        for (int i=0; i<count; i++){
+        for (int i=0; i<count_comp; i++){
                 int y=0;
                 if (link==i){
-                        while (((buff+locate[i]))[y]!=' '){
-                                extracted_data[i][y]=((buff+locate[i])[y]);
+                        while (((buff+locate_comp[i]))[y]!=' '){
+                                extracted_data_comp[i][y]=((buff+locate_comp[i])[y]);
                                 y++;
                         }
                         link+=6;
                 }else {
-                        while (((buff+locate[i]))[y]!='<'){
-                                extracted_data[i][y]=((buff+locate[i])[y]);
+                        while (((buff+locate_comp[i]))[y]!='<'){
+                                extracted_data_comp[i][y]=((buff+locate_comp[i])[y]);
                                 y++;
                         }
                 }
-                extracted_data[i][y]='\0';
+                extracted_data_comp[i][y]='\0';
         }
 
-        for (int i=0; i<count; i++){
-                printf("%s\n",extracted_data[i]);
+        for (int i=0; i<count_comp; i++){
+                printf("%s\n",extracted_data_comp[i]);
+        }
+
+        //for domain course
+        
+        char extracted_data_domain[count_domain][200];
+        link=3;
+        for (int i=0; i<count_domain; i++){
+                int y=0;
+                int k=0;
+                while (((buff+locate_domain[i]))[k]==' '){
+                        k++;
+                }
+                if (link==i){
+                        while (((buff+locate_domain[i])+k)[y]!=' '){
+                                extracted_data_domain[i][y]=((buff+locate_domain[i]+k)[y]);
+                                y++;
+                        }
+                        link+=6;
+                }else {
+                        while (((buff+locate_domain[i]+k))[y]!='\r'){
+                                extracted_data_domain[i][y]=((buff+locate_domain[i]+k)[y]);
+                                y++;
+                        }
+                }
+                extracted_data_domain[i][y]='\0';
+        }
+
+        for (int i=0; i<count_domain; i++){
+                printf("%s\n",extracted_data_domain[i]);
         }
 
 
@@ -729,7 +799,6 @@ int course_list(char *cook, char *asp, char *session, int sem){
         snprintf(requestcookie, (strlen(cook)+strlen(asp)+strlen(session)+100) * sizeof(char), "Cookie: __RequestVerificationToken=%s; ASP.NET_SessionId=%s; .ASPXAUTH=%s", cook, session, asp);
         char semester[20];
         snprintf(semester, sizeof(semester), "sem=%d", sem);
-        printf("%s\n",semester);
         CURL *curl;
         CURLcode res;
         char *test=malloc(1);
@@ -760,7 +829,7 @@ int main(){
         scanf("%d", &test.username);
         scanf("%s",test.passwd);
         cookiev1(&test,test.username,test.passwd);
-        course_list(test.header, test.asp, test.session, 1);
+        course_list(test.header, test.asp, test.session, 2);
         /*exam_result(test.header, test.asp, test.session, 1);*/
         /*exam_schedule(test.header, test.asp, test.session);*/
         /*attendence(test.header, test.asp);*/
