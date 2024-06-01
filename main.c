@@ -764,6 +764,7 @@ int parse_course(char *buff){
         
         char extracted_data_domain[count_domain][200];
         link=3;
+        int attend=4;
         for (int i=0; i<count_domain; i++){
                 int y=0;
                 int k=0;
@@ -776,6 +777,24 @@ int parse_course(char *buff){
                                 y++;
                         }
                         link+=6;
+                }else if (attend==i){
+                        if ((strstr(buff+locate_domain[i],"class")-buff)<locate_domain[i+1]){
+                                // ugly fix because nptel i dont like it.
+                                char *temp=strstr(buff+locate_domain[i],"");
+                                temp=strstr(temp,"class");
+                                temp=strstr(temp+strlen("class"),"class");
+                                temp=strstr(temp+strlen("class"),">")+strlen(">");
+                                while ((temp)[y]!='<'){
+                                        extracted_data_domain[i][y]=((temp)[y]);
+                                        y++;
+                                }
+                        }else{
+                                while (((buff+locate_domain[i])+k)[y]!='\r'){
+                                        extracted_data_domain[i][y]=((buff+locate_domain[i]+k)[y]);
+                                        y++;
+                                }
+                        }
+                        attend+=6;
                 }else {
                         while (((buff+locate_domain[i]+k))[y]!='\r'){
                                 extracted_data_domain[i][y]=((buff+locate_domain[i]+k)[y]);
