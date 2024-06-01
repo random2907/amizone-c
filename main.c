@@ -742,13 +742,13 @@ int parse_course(char *buff){
         for (int i=0; i<count_comp; i++){
                 int y=0;
                 if (link==i){
-                        while (((buff+locate_comp[i]))[y]!=' '){
+                        while ((buff+locate_comp[i])[y]!=' '){
                                 extracted_data_comp[i][y]=((buff+locate_comp[i])[y]);
                                 y++;
                         }
                         link+=6;
                 }else {
-                        while (((buff+locate_comp[i]))[y]!='<'){
+                        while ((buff+locate_comp[i])[y]!='<'){
                                 extracted_data_comp[i][y]=((buff+locate_comp[i])[y]);
                                 y++;
                         }
