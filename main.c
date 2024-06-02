@@ -756,10 +756,6 @@ int parse_course(char *buff){
                 extracted_data_comp[i][y]='\0';
         }
 
-        for (int i=0; i<count_comp; i++){
-                printf("%s\n",extracted_data_comp[i]);
-        }
-
         //for domain course
         
         char extracted_data_domain[count_domain][200];
@@ -772,8 +768,15 @@ int parse_course(char *buff){
                         k++;
                 }
                 if (link==i){
-                        while (((buff+locate_domain[i])+k)[y]!=' '){
-                                extracted_data_domain[i][y]=((buff+locate_domain[i]+k)[y]);
+                        int nptel_link=0;
+                        if (((buff+locate_domain[i])+k)[y]=='"'){
+                                nptel_link++;
+                        }
+                        while (((buff+locate_domain[i])+k+nptel_link)[y]!=' '){
+                                if (((buff+locate_domain[i])+k+nptel_link)[y]=='"'){
+                                        break;
+                                }
+                                extracted_data_domain[i][y]=((buff+locate_domain[i]+k+nptel_link)[y]);
                                 y++;
                         }
                         link+=6;
@@ -804,11 +807,39 @@ int parse_course(char *buff){
                 extracted_data_domain[i][y]='\0';
         }
 
-        for (int i=0; i<count_domain; i++){
-                printf("%s\n",extracted_data_domain[i]);
+        size_t max_buffer_size=0;  // default for json key
+        for (int i=0; i<count_comp; i++){
+                max_buffer_size+=(70+strlen(extracted_data_comp[i]));
         }
+        for (int i=0; i<count_domain; i++){
+                max_buffer_size+=(70+strlen(extracted_data_domain[i]));
+        }
+        char *course_json=malloc(max_buffer_size*sizeof(char));
+        course_json[0]='[';
+        course_json[1]='\0';
+        for (int i=0; i<count_comp; i+=6){
+                size_t buffer_size=(140+strlen(extracted_data_comp[i])+strlen(extracted_data_comp[i+1])+strlen(extracted_data_comp[i+2])+strlen(extracted_data_comp[i+3])+strlen(extracted_data_comp[i+4])+strlen(extracted_data_comp[i+5])+strlen(extracted_data_comp[i+6])+strlen(extracted_data_comp[i+7])+strlen(extracted_data_comp[i+8])+strlen(extracted_data_comp[i+9]));
+                char *buffer=malloc(buffer_size*sizeof(char));
+                snprintf(buffer,buffer_size,"{\"Course_Code\":\"%s\", \"Course_Name\":\"%s\", \"Type\":\"%s\", \"link\":\"%s\", \"Attendance\":\"%s\", \"Internal Asses.\":\"%s\"}",extracted_data_comp[i],extracted_data_comp[i+1],extracted_data_comp[i+2],extracted_data_comp[i+3],extracted_data_comp[i+4],extracted_data_comp[i+5]);
+                strncat(course_json, buffer, max_buffer_size-strlen(course_json)-1); 
+                strncat(course_json, ",", max_buffer_size-strlen(course_json)-1); 
+                free(buffer);
+        }
+        for (int i=0; i<count_domain; i+=6){
+                size_t buffer_size=(140+strlen(extracted_data_domain[i])+strlen(extracted_data_domain[i+1])+strlen(extracted_data_domain[i+2])+strlen(extracted_data_domain[i+3])+strlen(extracted_data_domain[i+4])+strlen(extracted_data_domain[i+5])+strlen(extracted_data_domain[i+6])+strlen(extracted_data_domain[i+7])+strlen(extracted_data_domain[i+8])+strlen(extracted_data_domain[i+9]));
+                char *buffer=malloc(buffer_size*sizeof(char));
+                snprintf(buffer,buffer_size,"{\"Course_Code\":\"%s\", \"Course_Name\":\"%s\", \"Type\":\"%s\", \"link\":\"%s\", \"Attendance\":\"%s\", \"Internal Asses.\":\"%s\"}",extracted_data_domain[i],extracted_data_domain[i+1],extracted_data_domain[i+2],extracted_data_domain[i+3],extracted_data_domain[i+4],extracted_data_domain[i+5]);
+                strncat(course_json, buffer, max_buffer_size-strlen(course_json)-1); 
 
-
+                if (i+6<count_domain){
+                        strncat(course_json, ",", max_buffer_size-strlen(course_json)-1); 
+                }
+                free(buffer);
+        }
+        strncat(course_json, "]", max_buffer_size - strlen(course_json) - 1);
+        printf("%s\n",course_json);
+        free(course_json);
+        free(buff);
         return 0;
 
 }
