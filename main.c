@@ -249,6 +249,13 @@ size_t write_attend(char *buffer, size_t size, size_t nitems, char **userdata) {
         return 1;
 }
 
+size_t write_result(char *buffer, size_t size, size_t nitems, char **userdata) {
+        int total=size*nitems;
+        *userdata=realloc(*userdata,strlen(*userdata)+total+1);
+        strncat(*userdata,buffer,total);
+        return total;
+}
+
 int parse_attend(char *buff){
         // course_code
         int position_str[50];
@@ -475,7 +482,7 @@ int exam_schedule(char *cook, char *asp, char *session){
         return 0;
 }
 
-int parse_result(char *buff){
+int parse_result(char *buff, char sem){
         int count=0;
         int locate[150];
         char *result=buff;
@@ -537,26 +544,33 @@ int parse_result(char *buff){
 
         // left semester, scgpa, cgpa, back papers
 
-        int locate_ex[4];
-        result=strstr(result,searchbuff[10]);
-        result=strstr(result," ");
-        locate_ex[0]=result-buff+strlen(searchbuff[10]);
-        result+=strlen(searchbuff[10]);
+        int count_ex=0;
+        int locate_ex[100];
+        while((strstr(result,searchbuff[13]))!=NULL){
+                result=strstr(result,searchbuff[10]);
+                result=strstr(result," ");
+                locate_ex[count_ex]=result-buff+strlen(searchbuff[10]);
+                result+=strlen(searchbuff[10]);
+                count_ex++;
 
-        result=strstr(result,searchbuff[11]);
-        result=strstr(result," ");
-        locate_ex[1]=result-buff+strlen(searchbuff[11]);
-        result+=strlen(searchbuff[11]);
+                result=strstr(result,searchbuff[11]);
+                result=strstr(result," ");
+                locate_ex[count_ex]=result-buff+strlen(searchbuff[11]);
+                result+=strlen(searchbuff[11]);
+                count_ex++;
 
-        result=strstr(result,searchbuff[12]);
-        result=strstr(result," ");
-        locate_ex[2]=result-buff+strlen(searchbuff[12]);
-        result+=strlen(searchbuff[12]);
+                result=strstr(result,searchbuff[12]);
+                result=strstr(result," ");
+                locate_ex[count_ex]=result-buff+strlen(searchbuff[12]);
+                result+=strlen(searchbuff[12]);
+                count_ex++;
 
-        result=strstr(result,searchbuff[13]);
-        result=strstr(result," ");
-        locate_ex[3]=result-buff+strlen(searchbuff[13]);
-        result+=strlen(searchbuff[13]);
+                result=strstr(result,searchbuff[13]);
+                result=strstr(result," ");
+                locate_ex[count_ex]=result-buff+strlen(searchbuff[13]);
+                result+=strlen(searchbuff[13]);
+                count_ex++;
+        }
 
         //done
 
@@ -571,8 +585,8 @@ int parse_result(char *buff){
                 extracted_data[i][y]='\0';
         }
 
-        char extracted_data_ex[4][100];
-        for (int i=0; i<4; i++){
+        char extracted_data_ex[count_ex][100];
+        for (int i=0; i<count_ex; i++){
                 int y=0;
                 int k=0;
                 while (((buff+locate_ex[i]))[k]==' '){
@@ -584,9 +598,14 @@ int parse_result(char *buff){
                 }
                 extracted_data_ex[i][y]='\0';
         }
-
+        int data_count;
+        for (int i=0; i<count_ex; i++){
+                if (extracted_data_ex[i][0]==sem){
+                        data_count=i;
+                }
+        }
         size_t max_buffer_size=0;  // default for json key
-        max_buffer_size+=(70+strlen(extracted_data_ex[0])+strlen(extracted_data_ex[1])+strlen(extracted_data_ex[2])+strlen(extracted_data_ex[3]));
+        max_buffer_size+=(70+strlen(extracted_data_ex[data_count])+strlen(extracted_data_ex[data_count+1])+strlen(extracted_data_ex[data_count+2])+strlen(extracted_data_ex[data_count+3]));
 
         for (int i=0; i<count; i++){
                 max_buffer_size+=(70+strlen(extracted_data[i]));
@@ -594,9 +613,9 @@ int parse_result(char *buff){
         char *examresult_json=malloc(max_buffer_size*sizeof(char));
         examresult_json[0]='[';
         examresult_json[1]='\0';
-        size_t buffer_size_ex=(70+strlen(extracted_data_ex[0])+strlen(extracted_data_ex[1])+strlen(extracted_data_ex[2])+strlen(extracted_data_ex[3]));
+        size_t buffer_size_ex=(70+strlen(extracted_data_ex[data_count])+strlen(extracted_data_ex[data_count+1])+strlen(extracted_data_ex[data_count+2])+strlen(extracted_data_ex[data_count+3]));
         char *buffer_ex=malloc(buffer_size_ex*sizeof(char));
-        snprintf(buffer_ex,buffer_size_ex,"{\"Semester\":\"%s\", \"SGPA\":\"%s\", \"CGPA\":\"%s\", \"Back Papers\":\"%s\"}",extracted_data_ex[0],extracted_data_ex[1],extracted_data_ex[2],extracted_data_ex[3]);
+        snprintf(buffer_ex,buffer_size_ex,"{\"Semester\":\"%s\", \"SGPA\":\"%s\", \"CGPA\":\"%s\", \"Back Papers\":\"%s\"}",extracted_data_ex[data_count],extracted_data_ex[data_count+1],extracted_data_ex[data_count+2],extracted_data_ex[data_count+3]);
         strncat(examresult_json, buffer_ex, max_buffer_size-strlen(examresult_json)-1);
         strncat(examresult_json, ",", max_buffer_size-strlen(examresult_json)-1); 
 
@@ -635,7 +654,7 @@ int exam_result(char *cook, char *asp, char *session, int sem){
         struct curl_slist *headers = NULL;
         curl = curl_easy_init();
         if(curl) {
-                curl_easy_setopt(curl, CURLOPT_URL, "https://s.amizone.net/Examination/Examination?X-Requested-With=XMLHttpRequest");
+                curl_easy_setopt(curl, CURLOPT_URL, "https://s.amizone.net/Examination/Examination/ExaminationListSemWise");
                 curl_easy_setopt(curl, CURLOPT_POST, 1L);
                 curl_easy_setopt(curl, CURLOPT_POSTFIELDS, semester);
                 headers = curl_slist_append(headers, "Referer: https://s.amizone.net/Home");
@@ -643,13 +662,13 @@ int exam_result(char *cook, char *asp, char *session, int sem){
                 headers = curl_slist_append(headers, "Connection: keep-alive");
                 headers = curl_slist_append(headers, requestcookie);
                 curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-                curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_attend);
+                curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_result);
                 curl_easy_setopt(curl, CURLOPT_WRITEDATA, &test);
                 res = curl_easy_perform(curl);
                 curl_easy_cleanup(curl);
                 curl_slist_free_all(headers);
         }
-        parse_result(test); 
+        parse_result(test, sem+48); 
         return 0;
 }
 
@@ -757,7 +776,7 @@ int parse_course(char *buff){
         }
 
         //for domain course
-        
+
         char extracted_data_domain[count_domain][200];
         link=3;
         int attend=4;
@@ -879,8 +898,8 @@ int main(){
         scanf("%d", &test.username);
         scanf("%s",test.passwd);
         cookiev1(&test,test.username,test.passwd);
-        course_list(test.header, test.asp, test.session, 2);
-        /*exam_result(test.header, test.asp, test.session, 1);*/
+        /*course_list(test.header, test.asp, test.session, 2);*/
+        exam_result(test.header, test.asp, test.session, 1);
         /*exam_schedule(test.header, test.asp, test.session);*/
         /*attendence(test.header, test.asp);*/
         /*calender_schedule(test.header, test.asp,0);*/
