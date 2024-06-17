@@ -47,7 +47,6 @@ char *session(char *v1, char *cook){
         char *requestcookie = malloc((strlen(cook)+100) * sizeof(char));
         snprintf(requestcookie,(strlen(cook)+100) * sizeof(char), "Cookie: __RequestVerificationToken=%s", cook);
         CURL *curl;
-        CURLcode res;
         char *headers_data=malloc(1);
         *headers_data='\0';
         struct curl_slist *headers = NULL;
@@ -66,7 +65,7 @@ char *session(char *v1, char *cook){
                 curl_easy_setopt(curl, CURLOPT_WRITEDATA, NULL);
                 curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, write_header);
                 curl_easy_setopt(curl, CURLOPT_HEADERDATA, &headers_data);
-                res = curl_easy_perform(curl);
+                curl_easy_perform(curl);
                 curl_easy_cleanup(curl);
                 curl_slist_free_all(headers);
         }
@@ -95,7 +94,6 @@ char *asp(char *v1, char *cook, int username, char *password){
         char *requestcookie = malloc((strlen(cook)+100) * sizeof(char));
         snprintf(requestcookie,(strlen(cook)+100) * sizeof(char), "Cookie: __RequestVerificationToken=%s", cook);
         CURL *curl;
-        CURLcode res;
         char *headers_data=malloc(1);
         *headers_data='\0';
         struct curl_slist *headers = NULL;
@@ -113,7 +111,7 @@ char *asp(char *v1, char *cook, int username, char *password){
                 curl_easy_setopt(curl, CURLOPT_WRITEDATA, NULL);
                 curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, write_header);
                 curl_easy_setopt(curl, CURLOPT_HEADERDATA, &headers_data);
-                res = curl_easy_perform(curl);
+                curl_easy_perform(curl);
                 curl_easy_cleanup(curl);
                 curl_slist_free_all(headers);
         }
@@ -138,7 +136,6 @@ char *asp(char *v1, char *cook, int username, char *password){
 
 int cookiev1(struct secret *s1, int username, char *password) {
         CURL *curl;
-        CURLcode res;
         s1->loginform=malloc(1);
         *s1->loginform='\0';
         char *tmp_header=malloc(1);
@@ -150,7 +147,7 @@ int cookiev1(struct secret *s1, int username, char *password) {
                 curl_easy_setopt(curl, CURLOPT_HEADERDATA, &tmp_header);
                 curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_body);
                 curl_easy_setopt(curl, CURLOPT_WRITEDATA, &s1->loginform);
-                res = curl_easy_perform(curl);
+                curl_easy_perform(curl);
         }
         //parse tmp_header to get requestcookie
         char *result=strstr(tmp_header,"set-cookie: __RequestVerificationToken=");
@@ -180,7 +177,6 @@ int fee(char *cook, char *session, char *asp){
         char *requestcookie = malloc((strlen(cook)+strlen(asp)+100) * sizeof(char));
         snprintf(requestcookie,(strlen(cook)+strlen(asp)+100) * sizeof(char), "Cookie: __RequestVerificationToken=%s ASP.NET_SessionId=%s; .ASPXAUTH=%s", cook, session, asp);
         CURL *curl;
-        CURLcode res;
         struct curl_slist *headers = NULL;
         curl = curl_easy_init();
         if(curl) {
@@ -193,7 +189,7 @@ int fee(char *cook, char *session, char *asp){
                 headers = curl_slist_append(headers, "Connection: keep-alive");
                 headers = curl_slist_append(headers, requestcookie);
                 curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-                res = curl_easy_perform(curl);
+                curl_easy_perform(curl);
                 curl_easy_cleanup(curl);
                 curl_slist_free_all(headers);
         }
@@ -222,7 +218,6 @@ int class_schedule(char *cook, char *asp, int current){
         char *url = malloc((strlen(start)+strlen(end)+100) * sizeof(char));
         snprintf(url, (strlen(cook)+strlen(asp)+100) * sizeof(char), "https://s.amizone.net/Calendar/home/GetDiaryEvents?start=%s&end=%s&_=1707456987909", start, end);
         CURL *curl;
-        CURLcode res;
         struct curl_slist *headers = NULL;
         curl = curl_easy_init();
         if(curl) {
@@ -232,7 +227,7 @@ int class_schedule(char *cook, char *asp, int current){
                 headers = curl_slist_append(headers, "Connection: keep-alive");
                 headers = curl_slist_append(headers, requestcookie);
                 curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-                res = curl_easy_perform(curl);
+                curl_easy_perform(curl);
                 curl_easy_cleanup(curl);
                 curl_slist_free_all(headers);
         }
@@ -358,7 +353,6 @@ int attendence(char *cook, char *asp){
         char *requestcookie = malloc((strlen(cook)+strlen(asp)+100) * sizeof(char));
         snprintf(requestcookie, (strlen(cook)+strlen(asp)+100) * sizeof(char), "Cookie: __RequestVerificationToken=%s; .ASPXAUTH=%s", cook, asp);
         CURL *curl;
-        CURLcode res;
         char *test=malloc(1);
         *test='\0';
         struct curl_slist *headers = NULL;
@@ -372,7 +366,7 @@ int attendence(char *cook, char *asp){
                 curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
                 curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_attend);
                 curl_easy_setopt(curl, CURLOPT_WRITEDATA, &test);
-                res = curl_easy_perform(curl);
+                curl_easy_perform(curl);
                 curl_easy_cleanup(curl);
                 curl_slist_free_all(headers);
         }
@@ -459,7 +453,6 @@ int exam_schedule(char *cook, char *asp, char *session){
         char *requestcookie = malloc((strlen(cook)+strlen(asp)+100) * sizeof(char));
         snprintf(requestcookie, (strlen(cook)+strlen(asp)+100) * sizeof(char), "Cookie: __RequestVerificationToken=%s; .ASPXAUTH=%s; asp.net_sessionid=%s", cook, asp, session);
         CURL *curl;
-        CURLcode res;
         char *test=malloc(1);
         *test='\0';
         struct curl_slist *headers = NULL;
@@ -473,7 +466,7 @@ int exam_schedule(char *cook, char *asp, char *session){
                 curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
                 curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_attend);
                 curl_easy_setopt(curl, CURLOPT_WRITEDATA, &test);
-                res = curl_easy_perform(curl);
+                curl_easy_perform(curl);
                 curl_easy_cleanup(curl);
                 curl_slist_free_all(headers);
         }
@@ -648,7 +641,6 @@ int exam_result(char *cook, char *asp, char *session, int sem){
         char semester[20];
         snprintf(semester, sizeof(semester), "sem=%d", sem);
         CURL *curl;
-        CURLcode res;
         char *test=malloc(1);
         *test='\0';
         struct curl_slist *headers = NULL;
@@ -664,7 +656,7 @@ int exam_result(char *cook, char *asp, char *session, int sem){
                 curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
                 curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_result);
                 curl_easy_setopt(curl, CURLOPT_WRITEDATA, &test);
-                res = curl_easy_perform(curl);
+                curl_easy_perform(curl);
                 curl_easy_cleanup(curl);
                 curl_slist_free_all(headers);
         }
@@ -869,7 +861,6 @@ int course_list(char *cook, char *asp, char *session, int sem){
         char semester[20];
         snprintf(semester, sizeof(semester), "sem=%d", sem);
         CURL *curl;
-        CURLcode res;
         char *test=malloc(1);
         *test='\0';
         struct curl_slist *headers = NULL;
@@ -885,7 +876,7 @@ int course_list(char *cook, char *asp, char *session, int sem){
                 curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
                 curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_attend);
                 curl_easy_setopt(curl, CURLOPT_WRITEDATA, &test);
-                res = curl_easy_perform(curl);
+                curl_easy_perform(curl);
                 curl_easy_cleanup(curl);
                 curl_slist_free_all(headers);
         }

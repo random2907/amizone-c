@@ -1,5 +1,5 @@
 build:
-	@gcc main.c -o main -lcurl
+	@gcc main.c -o main -lcurl -Wall
 clean:
 	@rm main
 run:
