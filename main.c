@@ -140,7 +140,6 @@ char *asp(char *v1[5], char *cook, int username, char *password){
         char *tmp_asp=malloc((y+1)*sizeof(char));
         *tmp_asp='\0';
         strncat(tmp_asp,headers_data+position,y);
-        printf("%s\n",tmp_asp);
         free(requestcookie);
         free(requestver1);
         free(headers_data);
@@ -906,5 +905,5 @@ int main(){
         /*attendence(test.header, test.asp);*/
         /*class_schedule(test.header, test.asp,0);*/
         /*class_schedule(test.header, test.asp,1);*/
-        /*fee(test.header, test.session, test.asp);*/
+        fee(test.header, test.session, test.asp);
 }
