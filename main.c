@@ -6,11 +6,13 @@
 struct secret{
         int username;
         char passwd[100];
-        char *loginform;
+        char *loginform[5];
         char *header;
         char *asp;
         char *session;
 };
+
+
 
 size_t write_header(char *buffer, size_t size, size_t nitems, char *userdata) {
         int total=size*nitems;
@@ -20,16 +22,25 @@ size_t write_header(char *buffer, size_t size, size_t nitems, char *userdata) {
         return total;
 }
 
-size_t write_body(char *buffer, size_t size, size_t nitems, void *userdata) {
+size_t write_body(char *buffer, size_t size, size_t nitems, char *userdata[5]) {
         int total=size*nitems;
-        char **loginform = (char **)userdata;
-        *loginform=realloc(*loginform,strlen(*loginform)+total+1);
-        char *result=strstr(buffer,"value");
-        int start=result-buffer+7;
-        while(buffer[start]!='"')
-        {
-                strncat(*loginform,&buffer[start],1);
-                start++;
+        int test[5];
+        char *result=buffer;
+        for (int i=0; i<5; i++){
+                result=strstr(result,"value=");
+                test[i]=result-buffer+7;
+                result+=7;
+        }
+        for (int i=0; i<5; i++){
+                int start=test[i];
+                int length=0;
+                while(buffer[start+length]!='"')
+                {
+                        length++;
+                }
+                userdata[i]=malloc(length+1);
+                strncpy(userdata[i],&buffer[start],length);
+                userdata[i][length]='\0';
         }
         return total;
 }
@@ -41,9 +52,9 @@ size_t body_consume(char *buffer, size_t size, size_t nitems, void *userdata) {
 
 
 
-char *session(char *v1, char *cook){
-        char *requestver1 = malloc((strlen(v1)+100) * sizeof(char));
-        snprintf(requestver1,(strlen(v1)+100) * sizeof(char), "__RequestVerificationToken=%s", v1);
+char *session(char *v1[5], char *cook){
+        char *requestver1 = malloc((strlen(v1[0])+100) * sizeof(char));
+        snprintf(requestver1,(strlen(v1[0])+100) * sizeof(char), "__RequestVerificationToken=%s", v1[0]);
         char *requestcookie = malloc((strlen(cook)+100) * sizeof(char));
         snprintf(requestcookie,(strlen(cook)+100) * sizeof(char), "Cookie: __RequestVerificationToken=%s", cook);
         CURL *curl;
@@ -88,9 +99,10 @@ char *session(char *v1, char *cook){
         return tmp_session;
 }
 
-char *asp(char *v1, char *cook, int username, char *password){
-        char *requestver1 = malloc((strlen(v1)+100) * sizeof(char));
-        snprintf(requestver1,(strlen(v1)+100) * sizeof(char), "__RequestVerificationToken=%s&_UserName=%d&_QString=&_Password=%s", v1, username, password);
+char *asp(char *v1[5], char *cook, int username, char *password){
+        size_t request_size = strlen(v1[0])+strlen(v1[1])+strlen(v1[2])+strlen(v1[3])+strlen(v1[4])+200;
+        char *requestver1 = malloc(request_size * sizeof(char));
+        snprintf(requestver1,request_size * sizeof(char), "__RequestVerificationToken=%s&Salt=%s&SecretNumber=%s&Signature=%s&Challenge=%s&_UserName=%d&_QString=&_Password=%s&recaptchaToken=", v1[0], v1[1], v1[2], v1[3], v1[4], username, password);
         char *requestcookie = malloc((strlen(cook)+100) * sizeof(char));
         snprintf(requestcookie,(strlen(cook)+100) * sizeof(char), "Cookie: __RequestVerificationToken=%s", cook);
         CURL *curl;
@@ -128,6 +140,7 @@ char *asp(char *v1, char *cook, int username, char *password){
         char *tmp_asp=malloc((y+1)*sizeof(char));
         *tmp_asp='\0';
         strncat(tmp_asp,headers_data+position,y);
+        printf("%s\n",tmp_asp);
         free(requestcookie);
         free(requestver1);
         free(headers_data);
@@ -136,8 +149,6 @@ char *asp(char *v1, char *cook, int username, char *password){
 
 int cookiev1(struct secret *s1, int username, char *password) {
         CURL *curl;
-        s1->loginform=malloc(1);
-        *s1->loginform='\0';
         char *tmp_header=malloc(1);
         *tmp_header='\0';
         curl = curl_easy_init();
@@ -890,10 +901,10 @@ int main(){
         scanf("%s",test.passwd);
         cookiev1(&test,test.username,test.passwd);
         /*course_list(test.header, test.asp, test.session, 2);*/
-        exam_result(test.header, test.asp, test.session, 1);
+        /*exam_result(test.header, test.asp, test.session, 2);*/
         /*exam_schedule(test.header, test.asp, test.session);*/
         /*attendence(test.header, test.asp);*/
-        /*calender_schedule(test.header, test.asp,0);*/
+        /*class_schedule(test.header, test.asp,0);*/
         /*class_schedule(test.header, test.asp,1);*/
         /*fee(test.header, test.session, test.asp);*/
 }
